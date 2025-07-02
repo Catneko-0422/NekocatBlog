@@ -5,7 +5,6 @@ description: 快速安裝Archlinux教學
 tags: [OS, Archlinux, linux]
 category: linux
 image: "./cover.jpg"
-lang: "zh-TW"
 draft: false
 ---
 

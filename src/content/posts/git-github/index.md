@@ -5,7 +5,6 @@ description: 快速學會 Git 與 GitHub
 image: "./cover.jpg"
 tags: [Git, GitHub, version control]
 category: "development tools"
-lang: "zh-TW"
 draft: false
 ---
 

@@ -5,7 +5,6 @@ description: 我的 Windows 開發環境、常用 config 與 dotfiles 設定
 image: "./cover.jpg"
 tags: [Windows, Config, Dotfiles]
 category: "Environment Setup"
-lang: "zh-TW"
 draft: false
 ---
 
