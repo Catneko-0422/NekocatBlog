@@ -1,9 +1,10 @@
 # About
-This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
 
-::github{repo="saicaca/fuwari"}
+## 這裡是我的個人部落格，專門放我的研究筆記喵！
 
-> ### Sources of images used in this site
-> - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+嗨嗨～我是 Nekocat，這裡是我的學習倉庫，也是我用來整理我混亂頭腦的地方。你會看到很多 AI、資訊、軟硬整合、各種神秘筆記！
+
+如果想看我的**個人網站**（有作品集、聯絡方式），  
+可以直接踩到 👉 [www.nekocat.cc](https://www.nekocat.cc) ！
+
+有問題、合作、或想一起創造貓咪宇宙，隨時留言給我！
