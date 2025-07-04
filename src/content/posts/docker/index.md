@@ -8,7 +8,7 @@ category: "development tools"
 draft: false
 ---
 
-# docker教學
+# Docker教學
 Containers as a Service ( CaaS ) - 容器如同服務
 Docker 是一個開源專案，出現於 2013 年初，最初是 Dotcloud 公司內部的 Side-Project。
 它基於 Google 公司推出的 Go 語言實作。（ Dotcloud 公司後來改名為 Docker ）
@@ -49,8 +49,8 @@ Docker 是一種容器化技術，可以讓你將應用程式、環境、相依�
 ## 指令說明 - 安裝、指令
 
 ### 安裝Docker
-[官方文件 Get started with Docker for Mac](https://docs.docker.com/desktop/setup/sign-in/)
-[官方官方 Get started with Docker for Windows](https://docs.docker.com/desktop/setup/sign-in/)
+[Get started with Docker for Mac](https://docs.docker.com/desktop/setup/sign-in/)
+[Get started with Docker for Windows](https://docs.docker.com/desktop/setup/sign-in/)
 [Docker Toolbox overview](https://docs.docker.com/retired/)
 
 ### Image 映像檔 常用指令
@@ -137,7 +137,7 @@ build : 使用build 指令時要先切換到Dockerfile 目錄下面
 | `ps -a`              | 列表                 | docker ps -a                  |
 | `logs [Contain ID]`  | 查看容器內的資訊      | docker logs -f a4             |
 | `exec [Contain ID]`  | 進入容器(開新console) | docker exec -ti a4 /bin/bash  |
-| `attach`             | 進入容器(退出停止容器) | dockr attach a4               |
+| `attach`             | 進入容器(退出停止容器) | docker attach a4               |
 | `inspect`            | 查看                  | docker inspect a4            |
 
 ##### 啟動一個 Container 並且執行 ping google.com
@@ -251,3 +251,277 @@ $ docker inspect 8a
 | `export` | 匯出      | docker export 7691a814370e > ubuntu.tar |
 | `import` | 匯入      | cat ubuntu.tar sudo docker import - test/ubuntu:v1.0 |
 
+##### 對容器存檔
+```Shell
+$ docker commit 96 aaa:v1
+sha256:5c9f90061b8802ac0b24d2bbab56305551304e6cbdc5d3bda1f5d2df12379d89
+$ docker images
+REPOSITORY          TAG         IMAGE ID            CREATED         SIZE
+aaa                 v1          5c9f90061b88        3 seconds ago   188MB
+```
+
+##### 對映像檔打標籤
+```Shell
+$ docker tag centos aaa asia.gcr.io/joyi-205504/aaa:v1
+$ docker images
+REPOSITORY                  TAG         IMAGE ID            CREATED         SIZE
+asia.gcr.io/joyi-205504/aaa v1          5c9f90061b88        3 seconds ago   188MB
+aaa                         v1          5c9f90061b88        3 seconds ago   188MB
+```
+
+##### 上傳到 GCP Registry
+```shell
+$ gcloud docker -- push  asia.gcr.io/joyi-205504/aaa:v1
+```
+
+### 其他常用指令
+##### 刪除
+```shell
+$ docker rmi `docker images|grep sele |awk '{print $3}'`
+```
+
+## Docker 資料管理
+
+#### 資料卷（Data volumes）
+- 資料卷可以在容器之間共享和重用
+- 對資料卷的修改會立馬生效
+- 對資料卷的更新，不會影響映像檔
+- 卷會一直存在，直到沒有容器使用
+
+**範例：建立一個 web 容器，並載入一個資料卷到容器的 /webapp 目錄**
+```shell
+$ docker run -d -P --name web -v /webapp training/webapp python app.py
+```
+
+**範例：本機的 /src/webapp 目錄到容器的 /opt/webapp 目錄**
+```shell
+$ docker run -d -P --name web -v /src/webapp:/opt/webapp training/webapp python app.py
+```
+
+**範例：Docker 掛載資料卷的預設權限是讀寫，使用者也可以透過 :ro 指定為唯讀**
+```shell
+$ docker run -d -P --name web -v /src/webapp:/opt/webapp:ro training/webapp python app.py
+```
+
+#### 資料卷容器（Data volume containers）
+持續更新的資料需要在容器之間共享，最好建立資料卷容器。
+一個正常的容器，專門用來提供資料卷供其它容器掛載的。
+
+**範例：建立一個命名的資料卷容器 dbdata**
+```shell
+$ docker run -d -v /dbdata --name dbdata postgres echo Data-only container for postgres
+```
+
+**範例：其他容器中使用 --volumes-from 來掛載 dbdata 容器中的資料卷**
+```shell
+$ docker run -d -P --volumes-from dbdata --name db1 postgres
+$ docker run -d -P --volumes-from dbdata --name db2 postgres
+```
+
+**範例：也可以從其他已經掛載了容器卷的容器來掛載資料卷。**
+```shell
+$ docker run -d --name db3 --volumes-from db1 postgres
+```
+
+**範例：備份**
+首先使用 --volumes-from 標記來建立一個載入 dbdata 容器卷的容器，並從本地主機掛載當前到容器的 /backup 目錄。
+```shell
+$ docker run --volumes-from dbdata -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /dbdata
+```
+
+**範例：恢復**
+恢復資料到一個容器，首先建立一個帶有資料卷的容器 dbdata2
+```shell
+$ docker run -v /dbdata --name dbdata2 ubuntu /bin/bash
+```
+然後建立另一個容器，掛載 dbdata2 的容器，並使用 untar 解壓備份檔案到掛載的容器卷中。
+```shell
+$ docker run --volumes-from dbdata2 -v $(pwd):/backup busybox tar xvf /backup/backup.tar
+```
+
+Docker 中的網路功能介紹
+- 要讓外部也可以存取這些應用
+- 可以通過-P或-p參數來指定連接埠映射。
+
+**範例：隨機本機Port**
+```shell
+$ docker run -d -P training/webapp python app.py
+```
+
+**範例：指定本機Port**
+```shell
+$ docker run -d -p 5000:5000 training/webapp python app.py
+```
+
+**範例：綁定 localhost 的任意連接埠到容器的 5000 連接埠，本地主機會自動分配一個連接埠**
+```shell
+$ docker run -d -p 127.0.0.1::5000 training/webapp python app.py
+```
+
+**範例：還可以使用 udp 標記來指定 udp 連接埠**
+```shell
+$ docker run -d -p 127.0.0.1:5000:5000/udp training/webapp python app.py
+```
+
+**範例： -p 標記可以多次使用來綁定多個連接埠**
+```shell
+$ docker run -d -p 5000:5000  -p 3000:80 training/webapp python app.py
+```
+
+## Dockerfile 說明
+- Dockerfile 由一行行命令語句組成，並且支援以 # 開頭的註解行。
+- Dockerfile 分為四部分：
+    - 基底映像檔資訊
+    - 維護者資訊
+    - 映像檔操作指令
+    - 容器啟動時執行指令。
+
+```shell
+# This dockerfile uses the ubuntu image
+# VERSION 2 - EDITION 1
+# Author: docker_user
+# Command format: Instruction [arguments / command] ..
+
+# 基本映像檔，必須是第一個指令
+FROM ubuntu
+
+# 維護者： docker_user <docker_user at email.com> (@docker_user)
+MAINTAINER docker_user docker_user@email.com
+
+# 更新映像檔的指令
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ raring main universe" >> /etc/apt/sources.list
+RUN apt-get update && apt-get install -y nginx
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+
+# 建立新容器時要執行的指令
+CMD /usr/sbin/nginx
+```
+
+#### Dockerfile 基本語法
+| 指令                                            | 說明                     | 範例                          |
+|-------------------------------------------------|-------------------------|-------------------------------|
+| `FORM:`                                         | 映像檔來源               | FROM python:3.5                   |
+| `MAINTAINER`                                    | 維護者訊息               | MAINTAINER docker_user docker_user@email.com |
+| `RUN`                                           | 創建映像檔時執行動作      | RUN apt-get -y update && apt-get install -y supervisor      | 
+| `RUN ["executable", "param1", "param2"]`        | 創建映像檔時執行動作      | RUN ["/bin/bash", "-c", "echo hello"] |
+| `CMD command param1 param2`                     | 啟動容器時執行的命令      | CMD pserve development.ini |
+| `CMD ["executable","param1","param2"]`          | 啟動容器時執行的命令      |  |
+| `CMD ["param1","param2"]`                       | 啟動容器時執行的命令     |  |
+| `EXPOSE`                                        | 容器對外的埠號          | EXPOSE 8082 |
+| `ADD`                                           | 複製檔案(單檔)          | ADD requirements.txt /usr/src/app/ |
+| `COPY`                                          | 複製檔案(資料夾)        | COPY . /usr/src/app |
+| `ENV`                                           | 環境變數                | ENV PG_VERSION 9.3.4 |
+| `ENTRYPOINT command param1 param2`              | 指定容器啟動後執行的命令 |  |
+| `ENTRYPOINT ["executable", "param1", "param2"]` | 指定容器啟動後執行的命令 | ENTRYPOINT ["/docker-entrypoint.sh"] |
+| `VOLUME ["/data"]`                              | 掛載資料卷              | VOLUME /var/lib/postgresql/data |
+| `USER daemon`                                   | 指定運行使用者          | RUN groupadd -r postgres && useradd -r -g postgres postgres |
+| `WORKDIR /path/to/workdir`                      | 指定工作目錄            | WORKDIR /usr/src/app |
+| `ONBUILD [INSTRUCTION]`                         | 基底映像檔建立時執行     | ONBUILD COPY . /usr/src/app |
+
+RUN 當命令較長時可以使用 \ 來換行。
+RUN : 在 shell 終端中運行命令，即 /bin/sh -c；
+RUN ["executable", "param1", "param2"] : 使用 exec 執行。
+
+CMD 指定啟動容器時執行的命令， 每個 Dockerfile 只能有一條 CMD 命令 。
+如果指定了多條命令，只有最後一條會被執行。
+CMD ["executable","param1","param2"] 使用 exec 執行，推薦使用；
+CMD command param1 param2 在 /bin/sh 中執行，使用在給需要互動的指令；
+CMD ["param1","param2"] 提供給 ENTRYPOINT 的預設參數；
+
+ENTRYPOINT：每個 Dockerfile 中只能有一個 ENTRYPOINT，當指定多個時，只有最後一個會生效。
+USER：要臨時取得管理員權限可以使用 gosu，而不推薦 sudo。
+WORKDIR：可以使用多個 WORKDIR 指令，後續命令如果參數是相對路徑，則會基於之前命令指定的路徑
+
+### Docker File Base
+```shell
+# 映像檔Image
+FROM python:3.5
+# 維護者
+MAINTAINER Pellok "pellok@double-cash.com"
+# 更新
+RUN apt-get -y update && apt-get install -y supervisor
+# 創建專案資料夾
+RUN mkdir -p /usr/src/app
+# 指定工作目錄在專案資料夾
+WORKDIR /usr/src/app
+# 預先要安裝的requirements複製到Docker裡面
+ADD requirements.txt /usr/src/app/
+# 安裝需要用的插件
+RUN pip install --upgrade pip setuptools
+RUN pip install --no-cache-dir -r requirements.txt
+# 下次Build 的時候複製專案目錄到Docker 裡面
+ONBUILD COPY . /usr/src/app
+```
+
+#### 建置
+```shell
+$ docker build -t sample:base .
+```
+
+Docker File for Project
+```shell
+#  挑選Image
+FROM sample:base
+# 安裝cryptography
+RUN pip install cryptography 
+# 設定工作目錄
+WORKDIR /usr/src/app/
+# 執行Python Setup
+RUN python setup.py develop
+# 開啟Port號
+EXPOSE 8082
+# 執行專案
+CMD pserve development.ini
+```
+#### 建置
+```shell
+$ docker build -t project:v1 .
+```
+
+#### Pyramid 專案 Docker 化
+```shell
+#創建一個新專案
+pcreate -s alchemy pyramid_dockerlize
+cd pyramid_dockerlize
+# 創建dockerfile
+touch Dockerfile
+# 編輯 Dockerfile
+# 建置映像檔
+docker build -t pyramid_dockerlize .
+# 執行容器
+docker run -d -P pyramid_dockerlize
+```
+
+#### Dockerfile
+```shell
+# This dockerfile uses the python pyramid
+# VERSION 1 - EDITION 1
+# Author: pellok
+# Command describe
+
+# 使用的python映像檔版本
+FROM python:3.5
+
+MAINTAINER pellok pellok@okborn.com
+
+# 創建存放專案的資料夾
+RUN mkdir -p /usr/src/app
+
+# 複製當前目錄的所有檔案到容器內的，資料放在/usr/src/app
+COPY . /usr/src/app
+
+# 指定工作目錄
+WORKDIR /usr/src/app/
+
+# 安裝環境變數和相依性套件
+RUN python setup.py develop
+
+# 初始化DB
+RUN initialize_pyramid_dockerlize_db development.ini
+
+# 專案監聽的Port號
+EXPOSE 6543
+
+# 啟動專案
+CMD pserve production.ini
+```
