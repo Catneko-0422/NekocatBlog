@@ -1,10 +1,10 @@
 ---
-title: 如何安裝archlinux
+title: "如何安裝 Arch Linux"
 published: 2025-06-02
-description: 快速安裝Archlinux教學
-tags: [OS, Archlinux, linux]
-category: linux
+description: "Quick guide to install Arch Linux"
 image: "./cover.jpg"
+tags: ["os", "archlinux", "linux"]
+category: "os"
 draft: false
 ---
 
@@ -12,14 +12,14 @@ draft: false
 
 ## 為什麼要安裝 Arch Linux？
 
-如果你喜歡 DIY、追求極致自由、希望深入理解 Linux 原理，Arch Linux 是非常適合的選擇。安裝過程能讓你徹底熟悉 Linux 系統底層架構，對學習大有幫助。
+如果你喜歡 DIY、追求極致自由、希望深入理解 Linux 原理，Arch Linux 是非常適合的選擇。安裝過程能幫助你熟悉 Linux 的系統架構，對學習大有幫助。
 
 ---
 
 ## 1. 製作 USB 開機碟
 
-1. 前往 [交大 archlinux iso](http://linux.cs.nctu.edu.tw/archlinux/iso/) 下載最新的 Arch Linux ISO。
-2. Windows 用戶建議使用 [Rufus](https://rufus.ie/) 製作 USB 開機碟。
+1. 前往 [台灣交大 Arch Linux ISO鏡像站](http://linux.cs.nctu.edu.tw/archlinux/iso/) 下載最新的 Arch Linux ISO。
+2. Windows 用戶建議使用 [Rufus](https://rufus.ie/) 製作 USB 開機碟。  
    *注意：這會清空 USB 的所有資料，請先備份。*
 
 ---
@@ -39,17 +39,15 @@ draft: false
 ```bash
 setfont iso01-12x22.psfu.gz
 ```
+> 如果找不到字型，可以使用 `ls /usr/share/kbd/consolefonts/` 查看可用字型。
 
 ### 切換鍵盤配置（可選）
 
 * 查看所有鍵盤配置：
-
   ```bash
   ls /usr/share/kbd/keymaps/**/*.map.gz | less
   ```
-
 * 設定美式鍵盤：
-
   ```bash
   loadkeys us
   ```
@@ -61,7 +59,6 @@ setfont iso01-12x22.psfu.gz
 ```bash
 ls /sys/firmware/efi/efivars
 ```
-
 有內容代表 UEFI 模式，沒有內容通常為 BIOS（建議使用 UEFI 並關閉 Secure Boot）。
 
 ---
@@ -69,15 +66,11 @@ ls /sys/firmware/efi/efivars
 ## 5. 網路連線
 
 * 檢查網路是否連線：
-
   ```bash
   ping archlinux.org
   ```
-
 * 有線網路通常自動連線。
-
 * 無線網路可使用 `iwctl` 連線：
-
   ```bash
   iwctl
   station <device> scan
@@ -102,8 +95,7 @@ timedatectl set-ntp true
 ```bash
 lsblk
 ```
-
-常見裝置如 `/dev/sda`、`/dev/nvme0n1`。
+常見裝置如 `/dev/sda`、`/dev/nvme0n1`，不同電腦型號可能會不同，請先確認自己的磁碟路徑。
 
 ### 分割磁碟
 
@@ -125,26 +117,19 @@ cfdisk /dev/sda
 ### 格式化分割區
 
 * EFI 分割區（假設 `/dev/sda1`）：
-
   ```bash
   mkfs.fat -F32 /dev/sda1
   ```
-
 * swap 分割區（假設 `/dev/sda2`）：
-
   ```bash
   mkswap /dev/sda2
   swapon /dev/sda2
   ```
-
 * root 分割區（假設 `/dev/sda3`）：
-
   ```bash
   mkfs.ext4 /dev/sda3
   ```
-
 * home 分割區（假設 `/dev/sda4`）：
-
   ```bash
   mkfs.ext4 /dev/sda4
   ```
@@ -154,20 +139,15 @@ cfdisk /dev/sda
 ## 8. 掛載分割區
 
 1. 掛載 root：
-
    ```bash
    mount /dev/sda3 /mnt
    ```
-
 2. 掛載 EFI：
-
    ```bash
    mkdir /mnt/boot
    mount /dev/sda1 /mnt/boot
    ```
-
 3. 掛載 home：
-
    ```bash
    mkdir /mnt/home
    mount /dev/sda4 /mnt/home
@@ -178,6 +158,7 @@ cfdisk /dev/sda
 ## 9. 設定鏡像站
 
 ```bash
+pacman -S reflector
 reflector --country Taiwan --latest 5 --sort rate --save /etc/pacman.d/mirrorlist
 cat /etc/pacman.d/mirrorlist
 ```
@@ -187,10 +168,12 @@ cat /etc/pacman.d/mirrorlist
 ## 10. 安裝基礎系統
 
 ```bash
-pacstrap /mnt base linux linux-firmware vim nano git sudo
+pacstrap -K /mnt base linux linux-firmware vim nano git sudo
 ```
-
-如果需要無線網路，建議同時安裝 `iw wpa_supplicant networkmanager`。
+如果需要無線網路，建議同時安裝：
+```bash
+pacstrap -K /mnt iw wpa_supplicant networkmanager
+```
 
 ---
 
@@ -223,20 +206,15 @@ hwclock --systohc
 ## 14. 設定語系
 
 * 編輯 `/etc/locale.gen`，取消註解以下兩行：
-
   ```
   zh_TW.UTF-8 UTF-8
   en_US.UTF-8 UTF-8
   ```
-
 * 生成語系：
-
   ```bash
   locale-gen
   ```
-
 * 設定語系：
-
   ```bash
   echo "LANG=zh_TW.UTF-8" > /etc/locale.conf
   ```
@@ -246,13 +224,10 @@ hwclock --systohc
 ## 15. 設定主機名稱與 hosts
 
 * 設定主機名稱：
-
   ```bash
   echo "archlinux" > /etc/hostname
   ```
-
 * 編輯 `/etc/hosts`：
-
   ```
   127.0.0.1    localhost
   ::1          localhost
@@ -276,25 +251,21 @@ pacman -S grub efibootmgr
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
+> 如果遇到無法開機的情況，嘗試加入 `--removable` 或檢查 Secure Boot。
 
 ---
 
 ## 18. 重啟與收尾
 
 1. 離開 chroot：
-
    ```bash
    exit
    ```
-
 2. 卸載所有分割區：
-
    ```bash
    umount -R /mnt
    ```
-
 3. 重開機：
-
    ```bash
    reboot
    ```
@@ -304,13 +275,10 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ## 19. 網路設定（開機自動取得 IP）
 
 * 查看網卡名稱：
-
   ```bash
   ip link
   ```
-
-* 新增 `/etc/systemd/network/你的網卡.network`，內容範例如下：
-
+* 新增 `/etc/systemd/network/你的網卡.network`：
   ```
   [Match]
   Name=你的網卡名稱
@@ -318,15 +286,11 @@ grub-mkconfig -o /boot/grub/grub.cfg
   [Network]
   DHCP=yes
   ```
-
 * 啟動 Networkd：
-
   ```bash
   systemctl enable --now systemd-networkd systemd-resolved
   ```
-
 * 驗證網路：
-
   ```bash
   ip a
   ```
@@ -335,21 +299,16 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ## 20. 建立新使用者與 sudo 權限
 
-* 建立新使用者（將 `your_username` 替換為實際帳號）：
-
+* 建立新使用者：
   ```bash
   useradd -m -G wheel,audio,video,storage your_username
   passwd your_username
   ```
-
 * 編輯 sudoers 檔案：
-
   ```bash
   EDITOR=vim visudo
   ```
-
-  找到這一行，把註解 `#` 拿掉：
-
+  取消註解：
   ```
   %wheel ALL=(ALL:ALL) ALL
   ```
@@ -358,6 +317,25 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 # 完成安裝
 
-Arch Linux 現已安裝完成，後續可依需求安裝桌面環境、AUR 管理工具等。
-
+Arch Linux 現已安裝完成，後續可依需求安裝桌面環境、AUR 管理工具等。  
 如需其他進階設定，建議參考官方 Wiki 或社群文件。
+
+---
+
+# 使用 archinstall 自動安裝
+
+自 2021 年起，官方 ISO 內建 `archinstall` 工具，提供互動式安裝方式，適合新手：
+
+```bash
+archinstall
+```
+
+你可以依照提示選擇：
+- 語言與鍵盤
+- 磁碟與分割方案
+- 桌面環境
+- 網路與使用者設定
+
+安裝完成後系統會自動設定，大幅縮短安裝時間。  
+建議新手先從 `archinstall` 開始，再嘗試傳統手動安裝。
+

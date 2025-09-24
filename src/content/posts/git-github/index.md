@@ -1,10 +1,10 @@
 ---
-title: Git 與 GitHub 使用教學入門
+title: "Git 與 GitHub 使用教學入門"
 published: 2025-07-01
-description: 快速學會 Git 與 GitHub
+description: "Quick guide to Git and GitHub"
 image: "./cover.jpg"
-tags: [Git, GitHub, version control]
-category: "development tools"
+tags: ["git", "github", "version-control"]
+category: "development-tools"
 draft: false
 ---
 

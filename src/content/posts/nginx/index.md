@@ -1,10 +1,10 @@
 ---
-title: Nginx 使用教學入門
+title: "Nginx 使用教學入門"
 published: 2025-09-08
-description: 基礎Nginx使用教學
+description: "Basic Nginx usage tutorial"
 image: "./cover.jpg"
-tags: [Nginx, Webserver, server]
-category: "Backend"
+tags: ["nginx", "webserver", "server"]
+category: "backend"
 draft: false
 ---
 
@@ -640,3 +640,4 @@ server {
 
 `weight`的值被分配的越大，被分配到的次數就會越多
 
+以上就是`nginx`的簡易使用方式。

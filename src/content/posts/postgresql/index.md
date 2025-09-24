@@ -1,13 +1,12 @@
 ---
-title: PostgreSQL 使用教學入門
+title: "PostgreSQL 使用教學入門"
 published: 2025-08-05
-description: 基礎PostgreSQL使用教學
+description: "Basic PostgreSQL usage tutorial"
 image: "./cover.jpg"
-tags: [PostgreSQL, SQL, DataBase]
-category: "Database teaching"
+tags: ["postgresql", "sql", "database"]
+category: "database"
 draft: false
 ---
-
 
 # PostgreSQL 使用教學入門
 我們希望能夠用一套完善的資料庫管理系統（DBMS，全稱 Database Management System）來處理資料在電腦上的保存問題，資料庫管理系統顧名思義就是用來管理資料儲存相關操作的事情，那一般常見的有支援 SQL （Structured Query Language）語法管理的資料庫，以及所謂的 NoSQL 資料庫。在我們的應用中，由於只是做一個簡單教學，所以其實用哪套資料庫系統都可以。但是如果今天你的應用比較複雜，或是對資料存取有特殊需求的話，可能就會需要比較一下各個資料庫的優缺點來決定要使用哪套資料庫。

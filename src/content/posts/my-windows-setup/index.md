@@ -1,10 +1,10 @@
 ---
-title: 我的 Windows 環境配置與 dotfiles
+title: "我的 Windows 環境配置與 dotfiles"
 published: 2025-07-01
-description: 我的 Windows 開發環境、常用 config 與 dotfiles 設定
+description: "My Windows development environment, common configs, and dotfiles setup"
 image: "./cover.jpg"
-tags: [Windows, Config, Dotfiles]
-category: "Environment Setup"
+tags: ["windows", "config", "dotfiles"]
+category: "environment-setup"
 draft: false
 ---
 

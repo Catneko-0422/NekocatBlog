@@ -1,10 +1,10 @@
 ---
-title: docker 使用教學
+title: "Docker 使用教學"
 published: 2025-07-02
-description: 快速學會使用docker
+description: "Quick guide to using Docker"
 image: "./cover.jpg"
-tags: [docker, dockerfile, containers]
-category: "development tools"
+tags: ["docker", "dockerfile", "containers"]
+category: "development-tools"
 draft: false
 ---
 

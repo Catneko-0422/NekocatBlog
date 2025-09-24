@@ -1,10 +1,10 @@
 ---
-title: Redis 使用教學入門
+title: "Redis 使用教學入門"
 published: 2025-08-21
-description: 基礎Redis使用教學
+description: "Basic Redis usage tutorial"
 image: "./cover.jpg"
-tags: [Redis, DataBase]
-category: "Database teaching"
+tags: ["redis", "database"]
+category: "database"
 draft: false
 ---
 
