@@ -73,23 +73,15 @@ const isRight = config.position === "right";
 ></iframe>
 
 <script is:inline>
-	type PioController = {
-		update: (
-			el: HTMLIFrameElement,
-			config: Record<string, unknown>,
-			hiddenOnMobile: boolean,
-		) => void;
-	};
-
-	const win = window as Window & { __mizukiPioController?: PioController };
-	const scriptEl = document.currentScript as HTMLScriptElement | null;
+	const win = window;
+	const scriptEl = document.currentScript;
 	const renderedEl =
 		scriptEl?.previousElementSibling instanceof HTMLIFrameElement &&
 		scriptEl.previousElementSibling.id === "l2d-iframe"
 			? scriptEl.previousElementSibling
 			: null;
 	const frames = Array.from(
-		document.querySelectorAll<HTMLIFrameElement>("#l2d-iframe"),
+		document.querySelectorAll("#l2d-iframe"),
 	);
 	const el = frames[0] ?? renderedEl;
 	const configSource = renderedEl ?? el;
@@ -103,18 +95,18 @@ const isRight = config.position === "right";
 		const hiddenOnMobile = configSource.dataset.hiddenOnMobile === "true";
 
 		if (!win.__mizukiPioController) {
-			const menuActions: Record<string, () => void> = {
+			const menuActions = {
 				home: () => (window.location.href = "/"),
 				scrollToTop: () => window.scrollTo({ top: 0, behavior: "smooth" }),
 			};
 
-			let currentEl: HTMLIFrameElement | null = null;
-			let currentConfig: Record<string, unknown> = {};
+			let currentEl = null;
+			let currentConfig = {};
 			let currentHiddenOnMobile = true;
 			let isTransitioning = false;
 			let initSent = false;
 			let currentConfigKey = "";
-			let pendingInit: number | undefined;
+			let pendingInit;
 			let swupHooksRegistered = false;
 
 			function applyVisibility() {
@@ -138,23 +130,17 @@ const isRight = config.position === "right";
 
 			function scheduleInit() {
 				window.clearTimeout(pendingInit);
-				const _window = window as Window & {
-					requestIdleCallback?: (
-						callback: IdleRequestCallback,
-						options?: IdleRequestOptions,
-					) => number;
-				};
 				const run = () => {
 					pendingInit = window.setTimeout(postInit, 0);
 				};
-				if (_window.requestIdleCallback) {
-					_window.requestIdleCallback(run, { timeout: 2000 });
+				if (window.requestIdleCallback) {
+					window.requestIdleCallback(run, { timeout: 2000 });
 				} else {
 					pendingInit = window.setTimeout(postInit, 500);
 				}
 			}
 
-			function handleMessage(e: MessageEvent) {
+			function handleMessage(e) {
 				if (!currentEl || e.source !== currentEl.contentWindow) return;
 
 				if (e.data.type === "l2d-loaded") {
