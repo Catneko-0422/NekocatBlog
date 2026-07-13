@@ -1,43 +1,120 @@
 ---
-import "@fontsource-variable/jetbrains-mono";
-import "@fontsource-variable/jetbrains-mono/wght-italic.css";
 
 interface Props {
 	class: string;
 }
 const className = Astro.props.class;
 ---
-<div data-pagefind-body class={`prose dark:prose-invert prose-base !max-w-none custom-md ${className}`}>
-    <!--<div class="prose dark:prose-invert max-w-none custom-md">-->
-    <!--<div class="max-w-none custom-md">-->
-    <slot/>
+
+<div
+	data-pagefind-body
+	class={`prose dark:prose-invert prose-base !max-w-none custom-md ${className}`}
+>
+	<!--<div class="prose dark:prose-invert max-w-none custom-md">-->
+	<!--<div class="max-w-none custom-md">-->
+	<slot />
 </div>
 
 <script>
-document.addEventListener("click", function (e: MouseEvent) {
-    const target = e.target as Element | null;
-    if (target && target.classList.contains("copy-btn")) {
-        const preEle = target.closest("pre");
-        const codeEle = preEle?.querySelector("code");
-        const code = Array.from(codeEle?.querySelectorAll(".code:not(summary *)") ?? [])
-            .map(el => el.textContent)
-            .map(t => t === "\n" ? "" : t)
-            .join("\n");
-        navigator.clipboard.writeText(code);
+	document.addEventListener("click", function (e: MouseEvent) {
+		const target = e.target as Element | null;
+		if (target && target.classList.contains("copy-btn")) {
+			const codeEle = target.parentElement?.querySelector("code");
 
-        const timeoutId = target.getAttribute("data-timeout-id");
-        if (timeoutId) {
-            clearTimeout(parseInt(timeoutId));
-        }
+			// 精確的代碼提取邏輯
+			let code = "";
+			if (codeEle) {
+				// 獲取所有代碼行元素
+				const lineElements = codeEle.querySelectorAll("span.line");
+				if (lineElements.length > 0) {
+					// 對於有行結構的代碼塊，精確處理每一行
+					const lines: string[] = [];
+					for (let i = 0; i < lineElements.length; i++) {
+						const lineElement = lineElements[i];
+						// 直接獲取文本內容，不添加額外處理
+						const lineText = lineElement.textContent || "";
+						lines.push(lineText);
+					}
+					// 重要：使用 \n 連接行，而不是 \n\n 或其他方式
+					code = lines.join("\n");
+				} else {
+					// 對於沒有行結構的代碼塊
+					const codeElements = codeEle.querySelectorAll(
+						".code:not(summary *)",
+					);
+					if (codeElements.length > 0) {
+						const lines: string[] = [];
+						for (let i = 0; i < codeElements.length; i++) {
+							const el = codeElements[i];
+							const lineText = el.textContent || "";
+							lines.push(lineText);
+						}
+						code = lines.join("\n");
+					} else {
+						// 最後回退到直接使用整個code元素的文本內容
+						code = codeEle.textContent || "";
+					}
+				}
+			}
 
-        target.classList.add("success");
+			// 處理連續空行：改進的邏輯
+			code = code.replace(/\n\n\n+/g, function (match) {
+				// 計算連續換行符的數量
+				const newlineCount = match.length;
+				// 計算空行數量（換行符數量減1）
+				const emptyLineCount = newlineCount - 1;
 
-        // 设置新的timeout并保存ID到按钮的自定义属性中
-        const newTimeoutId = setTimeout(() => {
-            target.classList.remove("success");
-        }, 1000);
+				// 偶數空行：除以2
+				// 奇數空行：(空行數+1)/2 向下取整
+				let resultEmptyLines: number;
+				if (emptyLineCount % 2 === 0) {
+					// 偶數
+					resultEmptyLines = emptyLineCount / 2;
+				} else {
+					// 奇數
+					resultEmptyLines = Math.floor((emptyLineCount + 1) / 2);
+				}
 
-        target.setAttribute("data-timeout-id", newTimeoutId.toString());
-    }
-});
+				// 至少保留一個空行
+				if (resultEmptyLines < 1) {
+					resultEmptyLines = 1;
+				}
+
+				// 返回對應數量的換行符
+				return "\n".repeat(resultEmptyLines + 1);
+			});
+
+			const copyToClipboard = async (text: string) => {
+				if (!navigator.clipboard?.writeText) {
+					throw new Error("Clipboard API 不可用");
+				}
+
+				await navigator.clipboard.writeText(text);
+			};
+
+			copyToClipboard(code)
+				.then(() => {
+					const timeoutId = target.getAttribute("data-timeout-id");
+					if (timeoutId) {
+						clearTimeout(parseInt(timeoutId));
+					}
+
+					target.classList.add("success");
+
+					// 設置新的timeout並保存ID到按鈕的自定義屬性中
+					const newTimeoutId = setTimeout(() => {
+						target.classList.remove("success");
+					}, 1000);
+
+					target.setAttribute(
+						"data-timeout-id",
+						newTimeoutId.toString(),
+					);
+				})
+				.catch((err) => {
+					console.error("複製失敗:", err);
+					// 可以在這裏添加用戶提示
+				});
+		}
+	});
 </script>

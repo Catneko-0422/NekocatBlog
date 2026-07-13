@@ -1,0 +1,10 @@
+{
+	"hidden": true,
+	"title": "隱藏的相冊",
+	"description": "這個相冊被設置爲隱藏(hidden屬性)，不會在相冊列表中顯示",
+	"date": "2025-08-28",
+	"location": "測試",
+	"tags": ["隱藏", "測試"],
+	"layout": "grid",
+	"columns": 3
+}

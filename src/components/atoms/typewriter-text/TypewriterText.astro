@@ -1,0 +1,180 @@
+---
+export interface Props {
+	text: string | string[];
+	speed?: number;
+	deleteSpeed?: number;
+	pauseTime?: number;
+	class?: string;
+}
+
+const {
+	text,
+	speed = 100,
+	deleteSpeed = 50,
+	pauseTime = 2000,
+	class: className = "",
+} = Astro.props;
+const textData = Array.isArray(text) ? JSON.stringify(text) : text;
+---
+
+<span
+	class={`typewriter ${className}`}
+	data-text={textData}
+	data-speed={speed}
+	data-delete-speed={deleteSpeed}
+	data-pause-time={pauseTime}></span>
+
+<script>
+	class TypewriterEffect {
+		private element: HTMLElement;
+		private texts: string[];
+		private currentTextIndex = 0;
+		private speed: number;
+		private deleteSpeed: number;
+		private pauseTime: number;
+		private currentIndex = 0;
+		private isDeleting = false;
+		private timeoutId: number | null = null;
+
+		constructor(element: HTMLElement) {
+			this.element = element;
+			const textData = element.dataset.text || "";
+
+			// 嘗試解析爲 JSON 數組，如果失敗則作爲單個字符串處理
+			try {
+				const parsed = JSON.parse(textData);
+				this.texts = Array.isArray(parsed) ? parsed : [textData];
+			} catch {
+				this.texts = [textData];
+			}
+
+			this.speed = parseInt(element.dataset.speed || "100");
+			this.deleteSpeed = parseInt(element.dataset.deleteSpeed || "50");
+			this.pauseTime = parseInt(element.dataset.pauseTime || "2000");
+
+			// 如果有多條文本且未啓用打字機效果，隨機顯示一條
+			if (this.texts.length > 1 && !this.isTypewriterEnabled()) {
+				this.showRandomText();
+			} else {
+				this.start();
+			}
+		}
+
+		private isTypewriterEnabled(): boolean {
+			// 檢查是否有打字機相關的數據屬性
+			return (
+				this.element.dataset.speed !== undefined ||
+				this.element.dataset.deleteSpeed !== undefined ||
+				this.element.dataset.pauseTime !== undefined
+			);
+		}
+
+		private showRandomText() {
+			const randomIndex = Math.floor(Math.random() * this.texts.length);
+			this.element.textContent = this.texts[randomIndex];
+		}
+
+		private start() {
+			if (this.texts.length === 0) {
+				return;
+			}
+			this.type();
+		}
+
+		private getCurrentText(): string {
+			return this.texts[this.currentTextIndex] || "";
+		}
+
+		private type() {
+			const currentText = this.getCurrentText();
+
+			if (this.isDeleting) {
+				// 刪除字符
+				if (this.currentIndex > 0) {
+					this.currentIndex--;
+					this.element.textContent = currentText.substring(
+						0,
+						this.currentIndex,
+					);
+					this.timeoutId = window.setTimeout(
+						() => this.type(),
+						this.deleteSpeed,
+					);
+				} else {
+					// 刪除完成，切換到下一條文本
+					this.isDeleting = false;
+					this.currentTextIndex =
+						(this.currentTextIndex + 1) % this.texts.length;
+					this.timeoutId = window.setTimeout(
+						() => this.type(),
+						this.speed,
+					);
+				}
+			} else {
+				// 添加字符
+				if (this.currentIndex < currentText.length) {
+					this.currentIndex++;
+					this.element.textContent = currentText.substring(
+						0,
+						this.currentIndex,
+					);
+					this.timeoutId = window.setTimeout(
+						() => this.type(),
+						this.speed,
+					);
+				} else {
+					// 打字完成，暫停後開始刪除（如果有多條文本）
+					if (this.texts.length > 1) {
+						this.isDeleting = true;
+						this.timeoutId = window.setTimeout(
+							() => this.type(),
+							this.pauseTime,
+						);
+					} else {
+						// 如果只有一條文本，保持顯示不刪除，但確保元素有內容
+						if (this.texts.length === 1 && this.texts[0] === "") {
+							this.element.innerHTML = "&nbsp;"; // 使用不間斷空格保持佈局
+						}
+					}
+				}
+			}
+		}
+
+		public destroy() {
+			if (this.timeoutId) {
+				clearTimeout(this.timeoutId);
+			}
+		}
+	}
+
+	// 初始化所有打字機效果
+	document.addEventListener("DOMContentLoaded", () => {
+		const typewriterElements = document.querySelectorAll(".typewriter");
+		typewriterElements.forEach((element) => {
+			new TypewriterEffect(element as HTMLElement);
+		});
+	});
+
+	// 支持頁面切換時重新初始化
+	document.addEventListener("swup:contentReplaced", () => {
+		const typewriterElements = document.querySelectorAll(".typewriter");
+		typewriterElements.forEach((element) => {
+			new TypewriterEffect(element as HTMLElement);
+		});
+	});
+</script>
+
+<style>
+	.typewriter {
+		position: relative;
+		min-height: 1.5em; /* 確保即使沒有文字也保持最小高度 */
+		display: inline-block;
+		vertical-align: baseline;
+	}
+
+	/* 確保打字機效果不會導致佈局抖動 */
+	.typewriter:empty::before {
+		content: "\00A0"; /* 使用不間斷空格保持高度 */
+		visibility: hidden;
+	}
+</style>

@@ -1,0 +1,24 @@
+{
+	"mode": "external",
+	"hidden": true,
+	"title": "外鏈相冊示例",
+	"description": "這是一個使用外鏈圖片的相冊示例，所有圖片都來自外部鏈接",
+	"date": "2025-08-28",
+	"location": "網絡",
+	"tags": ["外鏈", "示例", "測試"],
+	"layout": "masonry",
+	"columns": 3,
+	"cover": "https://picsum.photos/800/600?random=1",
+	"photos": [
+		{
+			"id": "external-1",
+			"src": "https://picsum.photos/800/600?random=2",
+			"alt": "隨機圖片 1",
+			"title": "美麗的風景",
+			"description": "這是一張來自外鏈的美麗風景圖片",
+			"tags": ["風景", "自然"],
+			"width": 800,
+			"height": 600
+		}
+	]
+}

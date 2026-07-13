@@ -1,0 +1,23 @@
+---
+/**
+ * TOC - 側邊欄目錄組件（向後兼容包裝器）
+ *
+ * @deprecated 請使用 import { SidebarTOC } from "@components/features/toc"
+ *
+ * 此包裝器將在下一個主要版本中刪除。
+ * 當前引用：SideBar.astro 仍在使用此組件
+ */
+
+import type { MarkdownHeading } from "astro";
+
+import SidebarTOC from "../../features/toc/SidebarTOC.astro";
+
+interface Props {
+	class?: string;
+	headings?: MarkdownHeading[];
+}
+
+const { class: className, headings } = Astro.props;
+---
+
+<SidebarTOC class={className} headings={headings} />

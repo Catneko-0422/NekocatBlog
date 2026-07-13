@@ -252,7 +252,7 @@ $ docker inspect 8a
 | `import` | 匯入      | cat ubuntu.tar sudo docker import - test/ubuntu:v1.0 |
 
 ##### 對容器存檔
-```Shell
+```shell
 $ docker commit 96 aaa:v1
 sha256:5c9f90061b8802ac0b24d2bbab56305551304e6cbdc5d3bda1f5d2df12379d89
 $ docker images
@@ -261,7 +261,7 @@ aaa                 v1          5c9f90061b88        3 seconds ago   188MB
 ```
 
 ##### 對映像檔打標籤
-```Shell
+```shell
 $ docker tag centos aaa asia.gcr.io/joyi-205504/aaa:v1
 $ docker images
 REPOSITORY                  TAG         IMAGE ID            CREATED         SIZE

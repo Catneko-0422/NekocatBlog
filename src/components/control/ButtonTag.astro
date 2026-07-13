@@ -1,13 +1,28 @@
 ---
-interface Props {
+/**
+ * ButtonTag - 標籤按鈕組件
+ *
+ * 用於標籤列表的緊湊鏈接按鈕，支持圓點指示器。
+ * 這是一個特定用途的組件，新的通用按鈕需求請使用 atoms/Button。
+ */
+interface ButtonTagProps {
 	size?: string;
 	dot?: boolean;
 	href?: string;
 	label?: string;
 }
-const { dot, href, label }: Props = Astro.props;
+const { dot, href, label }: ButtonTagProps = Astro.props;
 ---
-<a href={href} aria-label={label} class="btn-regular h-8 text-sm px-3 rounded-lg">
-    {dot && <div class="h-1 w-1 bg-[var(--btn-content)] dark:bg-[var(--card-bg)] transition rounded-md mr-2"></div>}
-    <slot></slot>
+
+<a
+	href={href}
+	aria-label={label}
+	class="btn-regular h-8 text-sm px-3 rounded-lg"
+>
+	{
+		dot && (
+			<div class="h-1 w-1 bg-(--btn-content) dark:bg-(--card-bg) transition rounded-md mr-2" />
+		)
+	}
+	<slot />
 </a>
