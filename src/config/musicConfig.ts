@@ -2,8 +2,8 @@ import type { MusicPlayerConfig } from "../types/config";
 
 // 音樂播放器配置
 export const musicPlayerConfig: MusicPlayerConfig = {
-	enable: false, // 啓用音樂播放器功能
-	showFloatingPlayer: false, // 顯示懸浮播放器 UI
+	enable: true, // 啓用音樂播放器功能
+	showFloatingPlayer: true, // 顯示懸浮播放器 UI
 	floatingEntryMode: "fab", // 懸浮入口模式："default" 爲獨立懸浮播放器，"fab" 爲集成到通用 FAB 組
 	mode: "local", // 音樂播放器模式，可選 "local" 或 "meting"
 	meting_api: "", // Meting API 地址
