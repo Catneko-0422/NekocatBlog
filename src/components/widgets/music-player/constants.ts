@@ -41,7 +41,7 @@ export const LOCAL_PLAYLIST: Song[] = [
 		id: 5,
 		title: "true my heart",
 		artist: "佐倉紗織",
-		cover: "/favicon/favicon.ico",
+		cover: "assets/music/cover/true_my_heart.webp",
 		url: "assets/music/url/true_my_heart.mp3",
 		duration: 0,
 	},
