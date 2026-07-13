@@ -14,17 +14,9 @@ export const LOCAL_PLAYLIST: Song[] = [
 		duration: 0,
 	},
 	{
-		id: 2,
-		title: "ひとり上手",
-		artist: "Kaya",
-		cover: "assets/music/cover/hitori.webp",
-		url: "assets/music/url/hitori.mp3",
-		duration: 240,
-	},
-	{
 		id: 3,
 		title: "眩耀夜行",
-		artist: "ス리즈ブーケ",
+		artist: "スリズブーケ",
 		cover: "assets/music/cover/xryx.webp",
 		url: "assets/music/url/xryx.mp3",
 		duration: 180,
