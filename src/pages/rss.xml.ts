@@ -12,7 +12,10 @@ import { siteConfig } from "@/config";
 import { getSortedPosts } from "@/utils/content-utils";
 import { resolvePostContentImageImportPath } from "@/utils/feed-image-utils";
 import { initPostIdMap } from "@/utils/permalink-utils";
-import { getPostPublicDescription } from "@/utils/post-card-content";
+import {
+	getPostPublicDescription,
+	shouldHidePostHomeContent,
+} from "@/utils/post-card-content";
 import { getPostUrl } from "@/utils/url-utils";
 
 const markdownParser = new MarkdownIt();
@@ -28,7 +31,9 @@ export async function GET(context: APIContext) {
 	}
 
 	// Use the same ordering as site listing (pinned first, then by published desc)
-	const posts = (await getSortedPosts()).filter((post) => !post.data.encrypted);
+	const posts = (await getSortedPosts()).filter(
+		(post) => !post.data.encrypted && !shouldHidePostHomeContent(post.data),
+	);
 
 	// 初始化文章 ID 映射（用於 permalink 功能）
 	initPostIdMap(posts);

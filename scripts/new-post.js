@@ -42,8 +42,12 @@ if (!fs.existsSync(dirPath)) {
 	fs.mkdirSync(dirPath, { recursive: true });
 }
 
+// 從檔名生成標題（去除擴展名），並做 YAML 字串跳脫避免破壞 front-matter
+const title = fileName.replace(/\.(md|mdx)$/i, "").replace(/[_-]+/g, " ");
+const escapedTitle = title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
 const content = `---
-title: ${args[0]}
+title: "${escapedTitle}"
 published: ${getDate()}
 description: ''
 image: ''

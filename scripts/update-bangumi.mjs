@@ -3,6 +3,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const API_BASE = "https://api.bgm.tv";
+// bgm.tv API 規範要求所有請求攜帶 User-Agent
+const HEADERS = {
+	"User-Agent": "Mizuki/9.0 (NekocatBlog anime data sync)",
+};
 const CONFIG_PATH = path.join(
 	path.dirname(fileURLToPath(import.meta.url)),
 	"../src/config/siteConfig.ts",
@@ -61,7 +65,9 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function fetchSubjectDetail(subjectId) {
 	try {
-		const response = await fetch(`${API_BASE}/v0/subjects/${subjectId}`);
+		const response = await fetch(`${API_BASE}/v0/subjects/${subjectId}`, {
+			headers: HEADERS,
+		});
 		if (!response.ok) return null;
 		return await response.json();
 	} catch (error) {
@@ -100,7 +106,7 @@ async function fetchCollection(userId, type) {
 	while (hasMore) {
 		const url = `${API_BASE}/v0/users/${userId}/collections?subject_type=2&type=${type}&limit=${limit}&offset=${offset}`;
 		try {
-			const response = await fetch(url);
+			const response = await fetch(url, { headers: HEADERS });
 
 			if (!response.ok) {
 				if (response.status === 404) {

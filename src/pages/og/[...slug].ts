@@ -1,6 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import * as fs from "node:fs";
+import path from "node:path";
 import type { APIContext, GetStaticPaths } from "astro";
 import satori from "satori";
 import sharp from "sharp";
@@ -113,15 +114,60 @@ export async function GET({
 	const { regular: fontRegular, bold: fontBold } = await fetchNotoSansSCFonts();
 
 	// Avatar + icon: still read from disk (small assets)
-	const avatarBuffer = fs.readFileSync(`./src/${profileConfig.avatar}`);
-	const avatarBase64 = `data:image/png;base64,${avatarBuffer.toString("base64")}`;
+	// 使用存在性檢查與副檔名推斷 MIME，避免建構期間因檔案缺失而崩潰
+	const mimeByExt: Record<string, string> = {
+		".png": "image/png",
+		".jpg": "image/jpeg",
+		".jpeg": "image/jpeg",
+		".webp": "image/webp",
+		".gif": "image/gif",
+		".svg": "image/svg+xml",
+		".ico": "image/x-icon",
+	};
 
-	let iconPath = "./public/favicon/favicon.ico";
+	const readImageAsDataUri = (filePath: string): string | null => {
+		try {
+			if (!fs.existsSync(filePath)) {
+				return null;
+			}
+			const buffer = fs.readFileSync(filePath);
+			const ext = path.extname(filePath).toLowerCase();
+			const mime = mimeByExt[ext] || "image/png";
+			return `data:${mime};base64,${buffer.toString("base64")}`;
+		} catch {
+			return null;
+		}
+	};
+
+	const avatarUri = (() => {
+		if (!profileConfig.avatar) {
+			return null;
+		}
+		if (profileConfig.avatar.startsWith("data:")) {
+			return profileConfig.avatar;
+		}
+		if (
+			profileConfig.avatar.startsWith("http://") ||
+			profileConfig.avatar.startsWith("https://")
+		) {
+			// 遠端頭像跳過（避免建構期間的網路依賴）
+			return null;
+		}
+		if (profileConfig.avatar.startsWith("/")) {
+			return readImageAsDataUri(`./public${profileConfig.avatar}`);
+		}
+		return readImageAsDataUri(`./src/${profileConfig.avatar}`);
+	})();
+
+	let iconUri: string | null = null;
 	if (siteConfig.favicon.length > 0) {
-		iconPath = `./public${siteConfig.favicon[0].src}`;
+		const iconSrc = siteConfig.favicon[0].src.startsWith("/")
+			? siteConfig.favicon[0].src
+			: `/${siteConfig.favicon[0].src}`;
+		iconUri = readImageAsDataUri(`./public${iconSrc}`);
+	} else {
+		iconUri = readImageAsDataUri("./public/favicon/favicon.ico");
 	}
-	const iconBuffer = fs.readFileSync(iconPath);
-	const iconBase64 = `data:image/png;base64,${iconBuffer.toString("base64")}`;
 
 	const hue = siteConfig.themeColor.hue;
 	const primaryColor = `hsl(${hue}, 90%, 65%)`;
@@ -162,10 +208,10 @@ export async function GET({
 							gap: "20px",
 						},
 						children: [
-							{
+							iconUri && {
 								type: "img",
 								props: {
-									src: iconBase64,
+									src: iconUri,
 									width: 48,
 									height: 48,
 									style: { borderRadius: "10px" },
@@ -279,10 +325,10 @@ export async function GET({
 										gap: "20px",
 									},
 									children: [
-										{
+										avatarUri && {
 											type: "img",
 											props: {
-												src: avatarBase64,
+												src: avatarUri,
 												width: 60,
 												height: 60,
 												style: { borderRadius: "50%" },

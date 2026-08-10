@@ -37,7 +37,7 @@ async function getRawSortedPosts() {
 		// 否則按發佈日期排序
 		const dateA = new Date(a.data.published);
 		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
+		return dateB.getTime() - dateA.getTime();
 	});
 	return sorted;
 }
@@ -217,10 +217,23 @@ function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
  * 計算標籤的 IDF（逆文檔頻率）權重
  * 稀有標籤（出現頻率低）獲得更高權重，常見標籤權重更低
  * IDF(tag) = log(N / (1 + df(tag)))，N = 總文章數，df = 包含該標籤的文章數
+ *
+ * 結果按 allPosts 陣列參考快取：建構期間 getCollection 傳回的內容不變，
+ * 避免每個文章頁面重複計算 O(N×tags) 的 IDF
  */
+const tagIDFCache = new WeakMap<
+	{ data: { tags?: string[] } }[],
+	Map<string, number>
+>();
+
 function computeTagIDF(
 	allPosts: { data: { tags?: string[] } }[],
 ): Map<string, number> {
+	const cached = tagIDFCache.get(allPosts);
+	if (cached) {
+		return cached;
+	}
+
 	const tagDF = new Map<string, number>();
 	const N = allPosts.length;
 
@@ -235,6 +248,7 @@ function computeTagIDF(
 	for (const [tag, df] of tagDF) {
 		tagIDF.set(tag, Math.log(N / (1 + df)));
 	}
+	tagIDFCache.set(allPosts, tagIDF);
 	return tagIDF;
 }
 

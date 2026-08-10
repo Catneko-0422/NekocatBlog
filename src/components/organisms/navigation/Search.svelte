@@ -241,6 +241,7 @@ onDestroy(() => {
 	}
 	clearTimeout(debounceTimer);
 	clearTimeout(focusTimer);
+	clearTimeout(blurTimer);
 });
 </script>
 

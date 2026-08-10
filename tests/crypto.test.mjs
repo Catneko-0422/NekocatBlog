@@ -3,11 +3,11 @@
  * 運行方式: node tests/crypto.test.mjs
  * 無需任何測試框架依賴
  */
-import { createCipheriv, createHmac, pbkdf2Sync } from "node:crypto";
+import { createCipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
 
 // 從源文件複製的常量（必須與 crypto-utils.ts 保持同步）
 const CRYPTO_CONSTANTS = {
-	PBKDF2_ITERATIONS: 100000,
+	PBKDF2_ITERATIONS: 600000,
 	SALT_LENGTH: 16,
 	IV_LENGTH: 12,
 	AUTH_TAG_LENGTH: 16,
@@ -16,15 +16,11 @@ const CRYPTO_CONSTANTS = {
 };
 
 // === 服務端加密（復刻 crypto-utils.ts） ===
-function deriveBytes(key, context, length) {
-	return createHmac("sha256", key).update(context).digest().subarray(0, length);
-}
-
-function encryptContent(html, password, slug) {
+function encryptContent(html, password) {
 	const { PBKDF2_ITERATIONS, SALT_LENGTH, IV_LENGTH, KEY_LENGTH, VERIFY_PREFIX } = CRYPTO_CONSTANTS;
 	const plaintext = VERIFY_PREFIX + html;
-	const salt = deriveBytes(password, `salt:${slug}`, SALT_LENGTH);
-	const iv = deriveBytes(password, `iv:${slug}`, IV_LENGTH);
+	const salt = randomBytes(SALT_LENGTH);
+	const iv = randomBytes(IV_LENGTH);
 	const key = pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, KEY_LENGTH, "sha256");
 	const cipher = createCipheriv("aes-256-gcm", key, iv);
 	const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
@@ -61,7 +57,6 @@ async function clientDecrypt(encData, password) {
 // === 測試用例 ===
 const testHtml = "<h1>Hello World</h1><p>這是一篇加密文章的內容</p>";
 const testPassword = "test-password-123";
-const testSlug = "encrypted-test-post";
 
 let passed = 0;
 let failed = 0;
@@ -85,20 +80,20 @@ async function test(name, fn) {
 console.log("Encryption System Tests\n");
 
 await test("encrypt and decrypt with correct password", async () => {
-	const encrypted = encryptContent(testHtml, testPassword, testSlug);
+	const encrypted = encryptContent(testHtml, testPassword);
 	assert(encrypted.length > 0, "ciphertext should not be empty");
 	const decrypted = await clientDecrypt(encrypted, testPassword);
 	assert(decrypted === testHtml, `decrypted content mismatch: got "${decrypted.slice(0, 30)}..."`);
 });
 
-await test("deterministic ciphertext for same inputs", () => {
-	const a = encryptContent(testHtml, testPassword, testSlug);
-	const b = encryptContent(testHtml, testPassword, testSlug);
-	assert(a === b, "same inputs should produce same ciphertext");
+await test("random salt/iv produce unique ciphertext", () => {
+	const a = encryptContent(testHtml, testPassword);
+	const b = encryptContent(testHtml, testPassword);
+	assert(a !== b, "same inputs should produce different ciphertext");
 });
 
 await test("reject wrong password", async () => {
-	const encrypted = encryptContent(testHtml, testPassword, testSlug);
+	const encrypted = encryptContent(testHtml, testPassword);
 	let threw = false;
 	try {
 		await clientDecrypt(encrypted, "wrong-password");
@@ -108,34 +103,28 @@ await test("reject wrong password", async () => {
 	assert(threw, "wrong password should throw");
 });
 
-await test("different slugs produce different ciphertext", () => {
-	const a = encryptContent(testHtml, testPassword, "slug-a");
-	const b = encryptContent(testHtml, testPassword, "slug-b");
-	assert(a !== b, "different slugs should produce different ciphertext");
-});
-
 await test("CJK content round-trip", async () => {
 	const cjk = "<p>日本語テスト 中文測試 한국어 테스트</p>";
-	const encrypted = encryptContent(cjk, testPassword, testSlug);
+	const encrypted = encryptContent(cjk, testPassword);
 	const decrypted = await clientDecrypt(encrypted, testPassword);
 	assert(decrypted === cjk, "CJK content mismatch");
 });
 
 await test("empty content round-trip", async () => {
-	const encrypted = encryptContent("", testPassword, testSlug);
+	const encrypted = encryptContent("", testPassword);
 	const decrypted = await clientDecrypt(encrypted, testPassword);
 	assert(decrypted === "", "empty content mismatch");
 });
 
 await test("special HTML characters round-trip", async () => {
 	const special = '<div class="test">&amp; &lt; &gt; "quotes" \'single\'</div>';
-	const encrypted = encryptContent(special, testPassword, testSlug);
+	const encrypted = encryptContent(special, testPassword);
 	const decrypted = await clientDecrypt(encrypted, testPassword);
 	assert(decrypted === special, "special HTML mismatch");
 });
 
 await test("CRYPTO_CONSTANTS have required fields", () => {
-	assert(CRYPTO_CONSTANTS.PBKDF2_ITERATIONS === 100000, "PBKDF2_ITERATIONS");
+	assert(CRYPTO_CONSTANTS.PBKDF2_ITERATIONS === 600000, "PBKDF2_ITERATIONS");
 	assert(CRYPTO_CONSTANTS.SALT_LENGTH === 16, "SALT_LENGTH");
 	assert(CRYPTO_CONSTANTS.IV_LENGTH === 12, "IV_LENGTH");
 	assert(CRYPTO_CONSTANTS.AUTH_TAG_LENGTH === 16, "AUTH_TAG_LENGTH");

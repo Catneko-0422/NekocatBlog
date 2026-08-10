@@ -485,7 +485,7 @@ export interface PioConfig {
 		welcome?: string | string[]; // 歡迎詞
 		touch?: string | string[]; // 觸摸提示
 		home?: string; // 首頁提示
-		skin?: [string, string]; // 換裝提示 [切換前, 切換後]
+		skin?: string | string[]; // 換裝提示
 		close?: string; // 關閉提示
 		link?: string; // 關於鏈接
 		custom?: {

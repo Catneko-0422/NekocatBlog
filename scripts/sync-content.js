@@ -12,7 +12,7 @@ loadEnv();
 console.log("已加載 .env 配置文件\n");
 
 // 從環境變量讀取配置
-const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC !== "false"; // 默認啓用
+const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC === "true"; // 默認禁用，需明確設置 true 才啓用
 const CONTENT_REPO_URL = process.env.CONTENT_REPO_URL || "";
 const CONTENT_DIR = process.env.CONTENT_DIR || path.join(rootDir, "content");
 

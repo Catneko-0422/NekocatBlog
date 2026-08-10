@@ -108,12 +108,8 @@ export const siteConfig: SiteConfig = {
 	banner: {
 		// 支持單張圖片或圖片數組，當數組長度 > 1 時自動啓用輪播
 		src: {
-			desktop: [
-				"/assets/desktop-banner/background.gif",
-			], // 桌面橫幅圖片
-			mobile: [
-				"/assets/desktop-banner/background.gif",
-			], // 移動橫幅圖片
+			desktop: ["/assets/desktop-banner/background.gif"], // 桌面橫幅圖片
+			mobile: ["/assets/desktop-banner/background.gif"], // 移動橫幅圖片
 		}, // 使用本地橫幅圖片
 
 		position: "center", // 等同於 object-position，僅支持 'top', 'center', 'bottom'。默認爲 'center'
@@ -145,10 +141,7 @@ export const siteConfig: SiteConfig = {
 			title: "Nekocat's Blog",
 			switchable: true,
 
-			subtitle: [
-				"NYUST Computer Science Student",
-				"Welcome to my blog",
-			],
+			subtitle: ["NYUST Computer Science Student", "Welcome to my blog"],
 			typewriter: {
 				enable: true, // 啓用副標題打字機效果
 
@@ -181,7 +174,7 @@ export const siteConfig: SiteConfig = {
 	generateOgImages: false, // 啓用生成OpenGraph圖片功能,注意開啓後要渲染很長時間，不建議本地調試的時候開啓
 	favicon: [
 		{
-			src: '/favicon/favicon.ico',
+			src: "/favicon/favicon.ico",
 		},
 	],
 

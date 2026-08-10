@@ -93,17 +93,17 @@ export function generatePermalinkSlug(post: CollectionEntry<"posts">): string {
 	}
 	const category = post.data.category || "uncategorized";
 
-	// 替換佔位符
+	// 替換佔位符（日期使用 UTC，避免建構機器時區造成日期偏移）
 	const slug = format
-		.replace(/%year%/g, published.getFullYear().toString())
+		.replace(/%year%/g, published.getUTCFullYear().toString())
 		.replace(
 			/%monthnum%/g,
-			(published.getMonth() + 1).toString().padStart(2, "0"),
+			(published.getUTCMonth() + 1).toString().padStart(2, "0"),
 		)
-		.replace(/%day%/g, published.getDate().toString().padStart(2, "0"))
-		.replace(/%hour%/g, published.getHours().toString().padStart(2, "0"))
-		.replace(/%minute%/g, published.getMinutes().toString().padStart(2, "0"))
-		.replace(/%second%/g, published.getSeconds().toString().padStart(2, "0"))
+		.replace(/%day%/g, published.getUTCDate().toString().padStart(2, "0"))
+		.replace(/%hour%/g, published.getUTCHours().toString().padStart(2, "0"))
+		.replace(/%minute%/g, published.getUTCMinutes().toString().padStart(2, "0"))
+		.replace(/%second%/g, published.getUTCSeconds().toString().padStart(2, "0"))
 		.replace(/%post_id%/g, getPostNumericId(post.id).toString())
 		.replace(/%postname%/g, postname)
 		.replace(/%raw_postname%/g, rawPostname)

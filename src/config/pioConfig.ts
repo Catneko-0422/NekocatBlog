@@ -12,10 +12,7 @@ export const pioConfig: PioConfig = {
 	hideAboutMenu: false, // 隱藏內置 About 菜單按鈕
 	dialog: {
 		welcome: "Welcome to Nekocat's Blog!",
-		touch: [
-			"What are you doing?",
-			"Stop touching me!",
-		],
+		touch: ["What are you doing?", "Stop touching me!"],
 		home: "Click here to go back to homepage!",
 		skin: ["Want to see my new outfit?"],
 		close: "See you next time~",

@@ -11,7 +11,6 @@ export async function GET() {
 			description: getPostPublicDescription(post.data),
 			published: post.data.published.getTime(),
 			category: post.data.category || "",
-			password: !!post.data.password,
 		}))
 		// 按發佈日期降序排列
 		.sort((a, b) => b.published - a.published);

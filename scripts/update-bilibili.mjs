@@ -314,6 +314,15 @@ async function processData(
 	return list;
 }
 
+async function safeProcessData(vmid, status, useWebp, coverMirror, SESSDATA) {
+	try {
+		return await processData(vmid, status, 1, useWebp, coverMirror, SESSDATA);
+	} catch (error) {
+		console.error(`Failed to fetch status ${status} data:`, error?.message || error);
+		return [];
+	}
+}
+
 async function main() {
 	console.log("Initializing Bilibili data update script...");
 
@@ -339,31 +348,11 @@ async function main() {
 	const useWebp = await getUseWebpFromConfig();
 
 	// 獲取三種狀態的數據 (1=想看, 2=在看, 3=已看)
+	// 單一狀態失敗不中斷整個腳本，避免其他狀態的數據遺失
 	console.log("\nFetching Bilibili bangumi data...");
-	const planned = await processData(
-		VMID,
-		1,
-		1,
-		useWebp,
-		coverMirror,
-		SESSDATA,
-	);
-	const watching = await processData(
-		VMID,
-		2,
-		1,
-		useWebp,
-		coverMirror,
-		SESSDATA,
-	);
-	const completed = await processData(
-		VMID,
-		3,
-		1,
-		useWebp,
-		coverMirror,
-		SESSDATA,
-	);
+	const planned = await safeProcessData(VMID, 1, useWebp, coverMirror, SESSDATA);
+	const watching = await safeProcessData(VMID, 2, useWebp, coverMirror, SESSDATA);
+	const completed = await safeProcessData(VMID, 3, useWebp, coverMirror, SESSDATA);
 
 	const finalAnimeList = [...planned, ...watching, ...completed];
 

@@ -31,8 +31,11 @@ export function getPostUrlBySlug(slug: string): string {
 }
 
 export function getPostUrlByAlias(alias: string): string {
-	// 移除開頭的斜槓並確保固定鏈接在 /posts/ 路徑下
-	const cleanAlias = alias.replace(/^\/+/, "");
+	// 移除開頭與結尾的斜槓，並移除可能的 "posts/" 前綴，避免重複
+	let cleanAlias = alias.replace(/^\/+/, "").replace(/\/+$/, "");
+	if (cleanAlias.startsWith("posts/")) {
+		cleanAlias = cleanAlias.replace(/^posts\//, "");
+	}
 	return url(`/posts/${cleanAlias}/`);
 }
 

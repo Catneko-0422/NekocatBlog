@@ -10,10 +10,22 @@ import { profileConfig, siteConfig } from "@/config";
 import { getSortedPosts } from "@/utils/content-utils";
 import { resolvePostContentImageImportPath } from "@/utils/feed-image-utils";
 import { initPostIdMap } from "@/utils/permalink-utils";
-import { getPostPublicDescription } from "@/utils/post-card-content";
+import {
+	getPostPublicDescription,
+	shouldHidePostHomeContent,
+} from "@/utils/post-card-content";
 import { getPostUrl } from "@/utils/url-utils";
 
 const markdownParser = new MarkdownIt();
+
+function escapeXml(value: string): string {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&apos;");
+}
 
 // get dynamic import of images as a map collection
 const imagesGlob = import.meta.glob<{ default: ImageMetadata }>(
@@ -25,10 +37,12 @@ export async function GET(context: APIContext) {
 		throw Error("site not set");
 	}
 
-	// Use the same ordering as site listing (pinned first, then by published desc)
-	// 過濾掉加密文章和草稿文章
+	// 過濾掉加密文章、需密碼訪問的文章和草稿文章
 	const posts = (await getSortedPosts()).filter(
-		(post) => !post.data.encrypted && post.data.draft !== true,
+		(post) =>
+			!post.data.encrypted &&
+			!shouldHidePostHomeContent(post.data) &&
+			post.data.draft !== true,
 	);
 
 	// 初始化文章 ID 映射（用於 permalink 功能）
@@ -36,14 +50,13 @@ export async function GET(context: APIContext) {
 
 	// 創建Atom feed頭部
 	let atomFeed = `<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>${siteConfig.title}</title>
-  <subtitle>${siteConfig.subtitle || "No description"}</subtitle>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="${escapeXml(siteConfig.lang)}">
+  <title>${escapeXml(siteConfig.title)}</title>
+  <subtitle>${escapeXml(siteConfig.subtitle || "No description")}</subtitle>
   <link href="${context.site}" rel="alternate" type="text/html"/>
   <link href="${new URL("atom.xml", context.site)}" rel="self" type="application/atom+xml"/>
   <id>${context.site}</id>
-  <updated>${new Date().toISOString()}</updated>
-  <language>${siteConfig.lang}</language>`;
+  <updated>${new Date().toISOString()}</updated>`;
 
 	for (const post of posts) {
 		// convert markdown to html string, ensure post.body is a string
@@ -96,21 +109,21 @@ export async function GET(context: APIContext) {
 
 		atomFeed += `
   <entry>
-    <title>${post.data.title}</title>
+    <title>${escapeXml(post.data.title)}</title>
     <link href="${postUrl}" rel="alternate" type="text/html"/>
     <id>${postUrl}</id>
     <published>${post.data.published.toISOString()}</published>
     <updated>${post.data.updated?.toISOString() || post.data.published.toISOString()}</updated>
-    <summary>${getPostPublicDescription(post.data)}</summary>
+    <summary>${escapeXml(getPostPublicDescription(post.data))}</summary>
     <content type="html"><![CDATA[${content}]]></content>
     <author>
-      <name>${profileConfig.name}</name>
+      <name>${escapeXml(profileConfig.name)}</name>
     </author>`;
 
 		// 添加分類標籤
 		if (post.data.category) {
 			atomFeed += `
-    <category term="${post.data.category}"></category>`;
+    <category term="${escapeXml(post.data.category)}"></category>`;
 		}
 
 		atomFeed += `

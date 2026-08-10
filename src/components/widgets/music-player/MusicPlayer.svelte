@@ -200,8 +200,6 @@ onDestroy(() => {
 });
 </script>
 
-<svelte:window onkeydown={handleVolumeKeyDown} />
-
 {#if shouldRenderFloatingUi}
 	{#if state.showError}
 		<div class="fixed bottom-20 right-4 z-60 max-w-sm">

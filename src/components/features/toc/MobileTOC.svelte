@@ -24,6 +24,9 @@ let isHomePage = $state(false);
 let observer: IntersectionObserver | undefined;
 let initializing = false;
 let swupListenersRegistered = $state(false);
+let initTimer: ReturnType<typeof setTimeout> | undefined;
+let popstateHandler: (() => void) | undefined;
+let swupEnableHandler: (() => void) | undefined;
 
 const togglePanel = async () => {
 	await panelManager.togglePanel("mobile-toc-panel");
@@ -118,9 +121,10 @@ const setupSwupListeners = () => {
 
 		swupListenersRegistered = true;
 	} else if (!swupListenersRegistered) {
-		window.addEventListener("popstate", () => {
+		popstateHandler = () => {
 			setTimeout(init, 200);
-		});
+		};
+		window.addEventListener("popstate", popstateHandler);
 		swupListenersRegistered = true;
 	}
 };
@@ -142,14 +146,17 @@ const checkSwupAvailability = () => {
 				if (w.swup) {
 					setupSwupListeners();
 					document.removeEventListener("swup:enable", checkSwup);
+					swupEnableHandler = undefined;
 				}
 			};
 
+			swupEnableHandler = checkSwup;
 			document.addEventListener("swup:enable", checkSwup);
 			setTimeout(() => {
 				if (w.swup) {
 					setupSwupListeners();
 					document.removeEventListener("swup:enable", checkSwup);
+					swupEnableHandler = undefined;
 				}
 			}, 1000);
 		}
@@ -180,14 +187,21 @@ const init = () => {
 };
 
 onMount(() => {
-	setTimeout(init, 100);
+	initTimer = setTimeout(init, 100);
 	window.addEventListener("scroll", updateActiveHeading, {
 		passive: true,
 	});
 
 	return () => {
+		clearTimeout(initTimer);
 		observer?.disconnect();
 		window.removeEventListener("scroll", updateActiveHeading);
+		if (popstateHandler) {
+			window.removeEventListener("popstate", popstateHandler);
+		}
+		if (swupEnableHandler) {
+			document.removeEventListener("swup:enable", swupEnableHandler);
+		}
 
 		const w = window as unknown as {
 			swup?: {

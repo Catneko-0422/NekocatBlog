@@ -50,6 +50,8 @@ class MusicPlayerStore {
 	private isInitialized = false;
 	private unregisterInteraction: (() => void) | undefined;
 	private listeners = new Set<(state: MusicPlayerState) => void>();
+	private errorSkipTimer: ReturnType<typeof setTimeout> | undefined;
+	private errorHideTimer: ReturnType<typeof setTimeout> | undefined;
 
 	constructor() {
 		this.state = this.createInitialState();
@@ -179,7 +181,8 @@ class MusicPlayerStore {
 		this.showError(i18n(Key.musicPlayerErrorSong));
 
 		if (this.state.playlist.length > 1) {
-			setTimeout(() => this.next(true), SKIP_ERROR_DELAY);
+			clearTimeout(this.errorSkipTimer);
+			this.errorSkipTimer = setTimeout(() => this.next(true), SKIP_ERROR_DELAY);
 		} else if (this.state.playlist.length <= 1) {
 			this.showError(i18n(Key.musicPlayerErrorEmpty));
 		}
@@ -205,6 +208,8 @@ class MusicPlayerStore {
 				});
 			}
 		}
+		// willAutoPlay 已消費，重置以避免後續 loadeddata 重複觸發自動播放
+		this.state.willAutoPlay = false;
 		this.broadcastState();
 	}
 
@@ -373,7 +378,8 @@ class MusicPlayerStore {
 	private showError(message: string): void {
 		this.state.errorMessage = message;
 		this.state.showError = true;
-		setTimeout(() => {
+		clearTimeout(this.errorHideTimer);
+		this.errorHideTimer = setTimeout(() => {
 			this.state.showError = false;
 			this.broadcastState();
 		}, 3000);
@@ -575,6 +581,8 @@ class MusicPlayerStore {
 	}
 
 	destroy(): void {
+		clearTimeout(this.errorSkipTimer);
+		clearTimeout(this.errorHideTimer);
 		if (this.unregisterInteraction) {
 			this.unregisterInteraction();
 		}

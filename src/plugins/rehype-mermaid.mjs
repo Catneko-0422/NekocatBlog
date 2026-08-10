@@ -5,6 +5,18 @@ import mermaidRenderScript from "./mermaid-render-script.js?raw";
 
 export function rehypeMermaid() {
 	return (tree) => {
+		// 每個頁面只注入一次渲染腳本，避免多個圖表重複輸出整份腳本
+		let scriptInjected = false;
+
+		// 創建客戶端渲染腳本
+		const renderScript = h(
+			"script",
+			{
+				type: "text/javascript",
+			},
+			mermaidRenderScript,
+		);
+
 		visit(tree, "element", (node) => {
 			if (
 				node.tagName === "div" &&
@@ -34,19 +46,14 @@ export function rehypeMermaid() {
 					],
 				);
 
-				// 創建客戶端渲染腳本
-				const renderScript = h(
-					"script",
-					{
-						type: "text/javascript",
-					},
-					mermaidRenderScript,
-				);
-
 				// 替換原始節點
 				node.tagName = "div";
 				node.properties = { class: "mermaid-diagram-container" };
-				node.children = [mermaidContainer, renderScript];
+				node.children = [mermaidContainer];
+				if (!scriptInjected) {
+					node.children.push(renderScript);
+					scriptInjected = true;
+				}
 			}
 		});
 	};
