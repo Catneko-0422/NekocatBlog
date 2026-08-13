@@ -4,7 +4,7 @@ published: 2025-06-02
 description: "Quick guide to install Arch Linux"
 image: "./cover.jpg"
 tags: ["os", "archlinux", "linux"]
-category: "os"
+category: "system"
 draft: false
 ---
 

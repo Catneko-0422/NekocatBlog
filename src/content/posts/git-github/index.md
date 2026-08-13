@@ -4,7 +4,7 @@ published: 2025-07-01
 description: "Quick guide to Git and GitHub"
 image: "./cover.jpg"
 tags: ["git", "github", "version-control"]
-category: "development-tools"
+category: "dev-tools"
 draft: false
 ---
 

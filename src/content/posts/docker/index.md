@@ -3,8 +3,8 @@ title: "Docker 使用教學"
 published: 2025-07-02
 description: "Quick guide to using Docker"
 image: "./cover.jpg"
-tags: ["docker", "dockerfile", "containers"]
-category: "development-tools"
+tags: ["docker", "container", "devops"]
+category: "dev-tools"
 draft: false
 ---
 

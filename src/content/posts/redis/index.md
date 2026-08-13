@@ -3,8 +3,8 @@ title: "Redis 使用教學入門"
 published: 2025-08-21
 description: "Basic Redis usage tutorial"
 image: "./cover.jpg"
-tags: ["redis", "database"]
-category: "database"
+tags: ["redis", "database", "cache"]
+category: "backend"
 draft: false
 ---
 

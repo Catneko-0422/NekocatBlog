@@ -4,7 +4,7 @@ published: 2025-08-05
 description: "Basic PostgreSQL usage tutorial"
 image: "./cover.jpg"
 tags: ["postgresql", "sql", "database"]
-category: "database"
+category: "backend"
 draft: false
 ---
 

@@ -3,8 +3,8 @@ title: "我的 Windows 環境配置與 dotfiles"
 published: 2025-07-01
 description: "My Windows development environment, common configs, and dotfiles setup"
 image: "./cover.jpg"
-tags: ["windows", "config", "dotfiles"]
-category: "environment-setup"
+tags: ["windows", "dotfiles", "setup"]
+category: "system"
 draft: false
 ---
 

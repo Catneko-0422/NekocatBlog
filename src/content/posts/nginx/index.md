@@ -3,7 +3,7 @@ title: "Nginx 使用教學入門"
 published: 2025-09-08
 description: "Basic Nginx usage tutorial"
 image: "./cover.jpg"
-tags: ["nginx", "webserver", "server"]
+tags: ["nginx", "web-server", "server"]
 category: "backend"
 draft: false
 ---
